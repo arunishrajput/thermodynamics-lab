@@ -7,7 +7,7 @@ An Arduino-connected dashboard that **proves the 1st Law of Thermodynamics** in 
 
 ---
 
-## Download
+## Download the Dashboard
 
 <a href="https://github.com/arunishrajput/thermodynamics-lab/releases/latest/download/ThermodynamicsLab.exe">
   <img src="https://img.shields.io/badge/Download-Windows%20.exe-0078d4?style=for-the-badge&logo=windows&logoColor=white"/>
@@ -22,15 +22,9 @@ An Arduino-connected dashboard that **proves the 1st Law of Thermodynamics** in 
 
 ---
 
-## What It Does
+## How It Works
 
-The dashboard connects to an Arduino over USB serial and continuously reads:
-
-- Water **temperature** (DS18B20 sensor)
-- Heater **voltage** and **current** (voltage sensor + ACS712)
-- Computed **power** and cumulative **energy** from the Arduino
-
-When you run an experiment (press **START** then **STOP**), the dashboard calculates:
+The Arduino reads three sensors every ~6 seconds, computes power and cumulative energy, and sends one CSV line over USB serial. The Python dashboard receives it, plots temperature in real time, and — after you press START / STOP — calculates the 1st Law balance:
 
 | Symbol | Formula | Meaning |
 |--------|---------|---------|
@@ -39,30 +33,7 @@ When you run an experiment (press **START** then **STOP**), the dashboard calcul
 | **Loss** | `W − Q` | Energy dissipated to the environment |
 | **η** | `Q / W × 100 %` | Thermal conversion efficiency |
 
-The **1st Law of Thermodynamics** states that energy is conserved:
-
-> **W = Q + Q_loss**
->
-> Electrical energy in = useful heat absorbed + environmental losses
-
-The dashboard shows this balance live and prints a colour-coded verdict after each experiment.
-
----
-
-## Dashboard Features
-
-| Feature | Details |
-|---------|---------|
-| **Live sensor cards** | Temperature, Voltage, Current, Power, Energy, Heater status — updated every second |
-| **Real-time graph** | Temperature vs time with glow fill, auto-scales as data arrives |
-| **Experiment mode** | START captures T₀ and E₀ · STOP captures T₁ and E₁ · live timer shows elapsed time |
-| **Results panel** | T₀, T₁, ΔT, Q, W, η — scrollable so nothing is ever cropped |
-| **1st Law analysis** | Full breakdown of W, Q, Loss and η with a colour-coded verdict |
-| **Port selector** | Auto-detect Arduino or choose a specific COM/serial port from a dropdown |
-| **Connection status** | Live indicator in the header; detects unexpected disconnects automatically |
-| **Configurable parameters** | Set water mass and specific heat · liquid preset dropdown (Water, Ethanol, Motor Oil, Glycerin, Mercury, Custom) · values persist between sessions |
-| **CSV export** | Save the full temperature vs time log to a `.csv` file |
-| **Scrollable sidebar** | All panels (Connection, Live Sensors, Parameters) scroll independently so nothing is hidden at any window size |
+> **W = Q + Q_loss** — energy in equals useful heat plus losses. The dashboard prints a colour-coded verdict confirming the 1st Law after every experiment.
 
 ---
 
@@ -70,38 +41,105 @@ The dashboard shows this balance live and prints a colour-coded verdict after ea
 
 | Component | Purpose |
 |-----------|---------|
-| Arduino (Uno / Nano / Mega) | Reads all sensors, sends CSV over USB serial at 9600 baud |
-| DS18B20 temperature sensor | Measures water temperature (°C) |
-| ACS712 current sensor | Measures current through the heater (A) |
-| Voltage sensor module | Measures 12 V supply voltage (V) |
-| 40 W ceramic cartridge heater | Heats the water (powered by 12 V DC adapter) |
+| Arduino Uno / Nano / Mega | Reads sensors, sends CSV at 9600 baud |
+| DS18B20 temperature sensor | Water temperature (°C) — data pin → D2 |
+| ACS712-5A current sensor | Heater current (A) — output → A1 |
+| Voltage divider module | 12 V rail sensing — output → A2 |
+| 16×2 I2C LCD (addr 0x27) | Local display (Temp / V+I / Energy screens) |
+| 40 W ceramic cartridge heater | Heats the water, powered by 12 V DC |
 | 12 V DC adapter | Power source for the heater |
 
-**Wiring:** Arduino reads DS18B20 for temperature, uses the voltage divider module to sense the 12 V rail, and uses the ACS712 to sense current through the heater circuit. It computes `P = V × I` and integrates over time to get cumulative energy, then sends all six values over serial every ~1 s.
+### Wiring
+
+```
+Arduino D2  ──── DS18B20 data  (4.7 kΩ pull-up to 5 V)
+Arduino A1  ──── ACS712 VIOUT
+Arduino A2  ──── Voltage divider output  (R1 = 30 kΩ, R2 = 7.5 kΩ)
+Arduino SDA ──── LCD SDA
+Arduino SCL ──── LCD SCL
+```
+
+- DS18B20 Vcc → 5 V, GND → GND, with a 4.7 kΩ resistor between Vcc and the data line.
+- ACS712 Vcc → 5 V, GND → GND. The heater current flows through its IP+ / IP− terminals.
+- Voltage divider: 12 V rail → R1 (30 kΩ) → junction → R2 (7.5 kΩ) → GND. Junction to A2. This scales 0–25 V down to 0–5 V for the Arduino ADC (×5 factor used in firmware).
+- LCD module Vcc → 5 V, GND → GND, SDA → A4, SCL → A5 (on Uno).
 
 ---
 
-## Arduino Serial Format
+## Arduino Setup
 
-The dashboard expects a comma-separated line over serial at **9600 baud**:
+### 1 — Install libraries
+
+Open the Arduino IDE, go to **Sketch → Include Library → Manage Libraries**, and install:
+
+| Library | Author |
+|---------|--------|
+| `LiquidCrystal I2C` | Frank de Brabander |
+| `OneWire` | Paul Stoffregen |
+| `DallasTemperature` | Miles Burton |
+
+`Wire.h` is built into the Arduino IDE — no install needed.
+
+### 2 — Upload the sketch
+
+1. Open [`arduino/ThermodynamicsLab.ino`](arduino/ThermodynamicsLab.ino) in the Arduino IDE.
+2. Select your board (**Tools → Board**) and port (**Tools → Port**).
+3. Click **Upload**.
+4. The LCD will show `SMART THERMO / Starting...` for 2 seconds, then begin cycling through three data screens.
+
+### 3 — Verify serial output
+
+Open **Tools → Serial Monitor** at **9600 baud**. You should see lines like:
+
+```
+24.5,11.87,3.21,38.10,1245.0,1
+```
+
+If temperature reads `-127.0`, check the DS18B20 wiring and the 4.7 kΩ pull-up.
+
+### Calibration notes
+
+| Parameter | Value in firmware | When to change |
+|-----------|------------------|----------------|
+| Voltage scale factor | `× 5.0` | Change if you use a different R1/R2 ratio |
+| ACS712 sensitivity | `0.185 V/A` | Use `0.100` for ACS712-20A, `0.066` for ACS712-30A |
+| Current noise gate | `0.30 A` | Lower if your heater draws < 1 A; raise to reduce flicker |
+
+---
+
+## Serial Data Format
+
+The dashboard expects exactly this CSV line at **9600 baud**, once per loop (~6 s):
 
 ```
 temperature,voltage,current,power,energy,heater_status
 ```
 
-Example:
-```
-24.5,11.87,3.21,38.10,1245.0,1
-```
+| Field | Type | Unit | Notes |
+|-------|------|------|-------|
+| temperature | float | °C | DS18B20 reading |
+| voltage | float | V | Scaled from voltage divider |
+| current | float | A | ACS712, rectified, noise-gated |
+| power | float | W | `voltage × current` |
+| energy | float | J | Cumulative since Arduino boot |
+| heater_status | int 0/1 | — | 1 = heater ON |
 
-| Field | Type | Unit |
-|-------|------|------|
-| temperature | float | °C |
-| voltage | float | V |
-| current | float | A |
-| power | float | W |
-| energy | float | J (cumulative since Arduino boot) |
-| heater_status | int (0/1) | 1 = heater ON |
+---
+
+## Dashboard Features
+
+| Feature | Details |
+|---------|---------|
+| **Live sensor cards** | Temperature, Voltage, Current, Power, Energy, Heater — updated every second |
+| **Real-time graph** | Temperature vs time with glow fill, auto-scales |
+| **Experiment mode** | START captures T₀ and E₀ · STOP captures T₁ and E₁ · live timer |
+| **Results panel** | T₀, T₁, ΔT, Q, W, η — scrollable so nothing is cropped |
+| **1st Law analysis** | Full W / Q / Loss / η breakdown with colour-coded verdict |
+| **Port selector** | Auto-detect or manually choose a COM/serial port |
+| **Connection status** | Live indicator; detects unexpected disconnects automatically |
+| **Configurable parameters** | Water mass and specific heat · liquid preset dropdown (Water, Ethanol, Motor Oil, Glycerin, Mercury, Custom) · persists between sessions |
+| **CSV export** | Save the full temperature log to a `.csv` file |
+| **Scrollable sidebar** | All panels scroll independently — nothing hidden at any window size |
 
 ---
 
@@ -112,7 +150,7 @@ git clone https://github.com/arunishrajput/thermodynamics-lab.git
 cd thermodynamics-lab
 
 python -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
+source venv/bin/activate       # Windows: venv\Scripts\activate
 
 pip install -r requirements.txt
 python dashboard.py
@@ -138,4 +176,4 @@ build_windows.bat
 
 ## Project Context
 
-This project was built to experimentally verify the **1st Law of Thermodynamics** — that energy cannot be created or destroyed, only converted. By heating a known mass of water with a measured electrical input and tracking the temperature rise, we can directly compare work input (W) with heat output (Q) and account for losses to the environment.
+This project was built to experimentally verify the **1st Law of Thermodynamics** — energy cannot be created or destroyed, only converted. By heating a known mass of water with a measured electrical input and tracking the temperature rise, we directly compare work input (W) with heat output (Q) and account for losses to the environment.
