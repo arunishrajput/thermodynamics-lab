@@ -361,14 +361,6 @@ fill_ref   = [None]
 mpl_canvas = FigureCanvasTkAgg(fig, master=gf)
 mpl_canvas.get_tk_widget().pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
-def _on_graph_resize(event):
-    if event.width > 50 and event.height > 50:
-        fig.set_size_inches(event.width / fig.dpi, event.height / fig.dpi)
-        fig.tight_layout(pad=2.5)
-        mpl_canvas.draw_idle()
-
-mpl_canvas.get_tk_widget().bind("<Configure>", _on_graph_resize)
-
 # ── Results ───────────────────────────────────────────────────────────────────
 rf = ctk.CTkFrame(right, fg_color=CARD, corner_radius=12)
 rf.grid(row=1, column=0, sticky="nsew", pady=(0, 10))
@@ -379,7 +371,16 @@ ctk.CTkLabel(
 ).pack(anchor="w", padx=18, pady=(13, 4))
 ctk.CTkFrame(rf, height=1, fg_color=BORDER).pack(fill="x", padx=18, pady=(0, 8))
 
-rg = ctk.CTkFrame(rf, fg_color="transparent")
+# Scrollable inner area — result cards + analysis never get cropped
+rf_scroll = ctk.CTkScrollableFrame(
+    rf, fg_color="transparent",
+    scrollbar_fg_color=CARD,
+    scrollbar_button_color=BORDER,
+    scrollbar_button_hover_color=CYAN,
+)
+rf_scroll.pack(fill="both", expand=True, padx=0, pady=(0, 4))
+
+rg = ctk.CTkFrame(rf_scroll, fg_color="transparent")
 rg.pack(fill="x", padx=12, pady=(0, 6))
 for c in range(3):
     rg.columnconfigure(c, weight=1)
@@ -402,13 +403,13 @@ r_w     = result_card(rg, 1, 1, "W = ΔE  (work in)",  "-- J",    AMBER)
 r_eff   = result_card(rg, 1, 2, "η  efficiency",      "-- %",    PURPLE)
 
 # Analysis
-ctk.CTkFrame(rf, height=1, fg_color=BORDER).pack(fill="x", padx=18, pady=(2, 8))
+ctk.CTkFrame(rf_scroll, height=1, fg_color=BORDER).pack(fill="x", padx=18, pady=(2, 8))
 ctk.CTkLabel(
-    rf, text="1ST LAW ANALYSIS",
+    rf_scroll, text="1ST LAW ANALYSIS",
     font=("SF Mono", 10, "bold"), text_color=TEXT_DIM
 ).pack(anchor="w", padx=18, pady=(0, 5))
 
-analysis_frame = ctk.CTkFrame(rf, fg_color=CARD2, corner_radius=8)
+analysis_frame = ctk.CTkFrame(rf_scroll, fg_color=CARD2, corner_radius=8)
 analysis_frame.pack(fill="x", padx=12, pady=(0, 12))
 
 PLACEHOLDER = "  Run an experiment — press  ▶ START  then  ■ STOP  to see the 1st Law verification."
