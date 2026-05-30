@@ -1,14 +1,15 @@
-name: Build Executables
+name: Build & Release
 
 on:
   push:
     branches: [main, master]
-  workflow_dispatch:        # also lets you trigger it manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
+  # ── Build both platforms in parallel ───────────────────────────────────────
   build:
     strategy:
-      fail-fast: false      # if one platform fails, still finish the other
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -25,11 +26,9 @@ jobs:
     name: Build · ${{ matrix.platform }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -39,8 +38,7 @@ jobs:
       - name: Build executable
         run: pyinstaller --clean ThermodynamicsLab.spec
 
-      # macOS only — zip the .app bundle so permissions & symlinks are preserved
-      - name: Package .app bundle (macOS)
+      - name: Package .app bundle (macOS only)
         if: runner.os == 'macOS'
         run: ditto -c -k --keepParent dist/ThermodynamicsLab.app dist/ThermodynamicsLab-macOS.zip
 
@@ -49,4 +47,43 @@ jobs:
         with:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.artifact_path }}
-          retention-days: 30
+
+  # ── Publish a GitHub Release so users can download from the repo page ──────
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          merge-multiple: true   # puts both files flat in artifacts/
+
+      - name: Publish release (tag = latest, always overwritten)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete latest --yes 2>/dev/null || true
+          git tag -f latest
+          git push origin latest --force
+
+          gh release create latest \
+            --title "Thermodynamics Lab · Latest Build" \
+            --notes "## Download
+
+| Platform | File |
+|---|---|
+| **Windows** | [ThermodynamicsLab.exe](https://github.com/${{ github.repository }}/releases/latest/download/ThermodynamicsLab.exe) |
+| **macOS** | [ThermodynamicsLab-macOS.zip](https://github.com/${{ github.repository }}/releases/latest/download/ThermodynamicsLab-macOS.zip) |
+
+> **macOS:** unzip → right-click the \`.app\` → **Open** (one-time Gatekeeper bypass)
+
+Built from [\`${GITHUB_SHA:0:7}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})" \
+            --latest \
+            artifacts/ThermodynamicsLab.exe \
+            artifacts/ThermodynamicsLab-macOS.zip
