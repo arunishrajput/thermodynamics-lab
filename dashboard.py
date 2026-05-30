@@ -49,6 +49,15 @@ def _auto_detect():
 WATER_MASS    = 0.3
 SPECIFIC_HEAT = 4186
 
+LIQUID_PRESETS = {
+    "Water":      4186,
+    "Ethanol":    2440,
+    "Motor Oil":  1900,
+    "Glycerin":   2410,
+    "Mercury":     139,
+    "Custom":     None,   # user fills manually
+}
+
 # ── Shared state ──────────────────────────────────────────────────────────────
 ser            = None
 serial_lock    = threading.Lock()
@@ -225,6 +234,89 @@ ctk.CTkLabel(hc_top, text="  HEATER", font=("SF Mono", 10), text_color=TEXT_DIM)
 heater_val = ctk.CTkLabel(hc, text="OFF", font=("SF Mono", 22, "bold"), text_color=TEXT_DIM)
 heater_val.pack(anchor="w", padx=13, pady=(1, 7))
 
+# ── Parameters section ────────────────────────────────────────────────────────
+ctk.CTkLabel(
+    left, text="PARAMETERS",
+    font=("SF Mono", 10, "bold"), text_color=TEXT_DIM
+).pack(anchor="w", padx=18, pady=(10, 4))
+ctk.CTkFrame(left, height=1, fg_color=BORDER).pack(fill="x", padx=18, pady=(0, 8))
+
+params_card = ctk.CTkFrame(left, fg_color=CARD2, corner_radius=10)
+params_card.pack(fill="x", padx=12, pady=(0, 12))
+
+def _prow(parent, title):
+    """Labelled parameter row — returns the inner frame for child widgets."""
+    f = ctk.CTkFrame(parent, fg_color="transparent")
+    f.pack(fill="x", padx=13, pady=(8, 0))
+    ctk.CTkLabel(f, text=title, font=("SF Mono", 9), text_color=TEXT_DIM).pack(anchor="w")
+    return f
+
+# Liquid preset
+liq_row = _prow(params_card, "LIQUID PRESET")
+liquid_var  = ctk.StringVar(value="Water")
+liquid_menu = ctk.CTkOptionMenu(
+    liq_row, variable=liquid_var,
+    values=list(LIQUID_PRESETS.keys()),
+    font=("SF Mono", 11),
+    fg_color=CARD, button_color=BORDER, button_hover_color=CYAN,
+    text_color=TEXT_MID, dropdown_fg_color=CARD,
+    dropdown_text_color=TEXT_MID, dropdown_hover_color=BORDER,
+    corner_radius=6, dynamic_resizing=False,
+    command=lambda choice: on_preset_change(choice),
+)
+liquid_menu.pack(fill="x", pady=(3, 0))
+
+# Water mass
+mass_row = _prow(params_card, "WATER MASS")
+mass_unit_row = ctk.CTkFrame(mass_row, fg_color="transparent")
+mass_unit_row.pack(fill="x", pady=(3, 0))
+mass_unit_row.columnconfigure(0, weight=1)
+mass_entry = ctk.CTkEntry(
+    mass_unit_row, font=("SF Mono", 13),
+    fg_color=CARD, border_color=BORDER, text_color=TEXT_MID,
+    corner_radius=6, justify="right",
+)
+mass_entry.insert(0, str(WATER_MASS))
+mass_entry.grid(row=0, column=0, sticky="ew", padx=(0, 6))
+ctk.CTkLabel(
+    mass_unit_row, text="kg",
+    font=("SF Mono", 11), text_color=TEXT_DIM
+).grid(row=0, column=1)
+
+# Specific heat capacity
+heat_row = _prow(params_card, "SPECIFIC HEAT")
+heat_unit_row = ctk.CTkFrame(heat_row, fg_color="transparent")
+heat_unit_row.pack(fill="x", pady=(3, 0))
+heat_unit_row.columnconfigure(0, weight=1)
+heat_entry = ctk.CTkEntry(
+    heat_unit_row, font=("SF Mono", 13),
+    fg_color=CARD, border_color=BORDER, text_color=TEXT_MID,
+    corner_radius=6, justify="right",
+)
+heat_entry.insert(0, str(SPECIFIC_HEAT))
+heat_entry.grid(row=0, column=0, sticky="ew", padx=(0, 6))
+ctk.CTkLabel(
+    heat_unit_row, text="J/kg·K",
+    font=("SF Mono", 11), text_color=TEXT_DIM
+).grid(row=0, column=1)
+
+# Apply button + live status
+apply_btn = ctk.CTkButton(
+    params_card, text="APPLY", height=30,
+    fg_color=CARD, border_width=1,
+    border_color=CYAN, text_color=CYAN, hover_color="#082030",
+    font=("SF Mono", 11, "bold"), corner_radius=6,
+    command=lambda: apply_params()
+)
+apply_btn.pack(fill="x", padx=13, pady=(10, 4))
+
+params_status = ctk.CTkLabel(
+    params_card,
+    text=f"  m = {WATER_MASS} kg   c = {SPECIFIC_HEAT} J/kg·K",
+    font=("SF Mono", 9), text_color=TEXT_DIM, anchor="w",
+)
+params_status.pack(anchor="w", padx=13, pady=(0, 10))
+
 # ── RIGHT panel ───────────────────────────────────────────────────────────────
 right = ctk.CTkFrame(body, fg_color="transparent")
 right.grid(row=0, column=1, sticky="nsew")
@@ -342,6 +434,49 @@ def refresh_ports():
     port_menu.configure(values=ports)
     if port_var.get() not in ports:
         port_var.set("Auto-detect")
+
+
+def on_preset_change(choice):
+    """Auto-fill specific heat when a liquid preset is selected."""
+    heat = LIQUID_PRESETS.get(choice)
+    if heat is not None:
+        heat_entry.delete(0, "end")
+        heat_entry.insert(0, str(heat))
+
+
+def apply_params():
+    global WATER_MASS, SPECIFIC_HEAT
+    try:
+        new_mass = float(mass_entry.get().strip())
+        new_heat = float(heat_entry.get().strip())
+        if new_mass <= 0 or new_heat <= 0:
+            raise ValueError
+    except (ValueError, TypeError):
+        params_status.configure(text="  ⚠  Enter valid positive numbers", text_color=RED)
+        def _reset_err():
+            params_status.configure(
+                text=f"  m = {WATER_MASS} kg   c = {SPECIFIC_HEAT} J/kg·K",
+                text_color=TEXT_DIM,
+            )
+        app.after(2500, _reset_err)
+        return
+
+    WATER_MASS    = round(new_mass, 4)
+    SPECIFIC_HEAT = round(new_heat, 1)
+    save_config({"water_mass": WATER_MASS, "specific_heat": SPECIFIC_HEAT})
+    params_status.configure(
+        text=f"  ✓  m = {WATER_MASS} kg   c = {SPECIFIC_HEAT} J/kg·K",
+        text_color=GREEN,
+    )
+    apply_btn.configure(border_color=GREEN, text_color=GREEN)
+
+    def _reset():
+        params_status.configure(
+            text=f"  m = {WATER_MASS} kg   c = {SPECIFIC_HEAT} J/kg·K",
+            text_color=TEXT_DIM,
+        )
+        apply_btn.configure(border_color=CYAN, text_color=CYAN)
+    app.after(2500, _reset)
 
 
 def connect():
@@ -613,9 +748,23 @@ def update_ui():
     app.after(1000, update_ui)
 
 
-# ── Startup: auto-connect using saved port preference ─────────────────────────
+# ── Startup: restore saved parameters then auto-connect ──────────────────────
 def startup_connect():
-    port_var.set(load_config().get("last_port", "Auto-detect"))
+    global WATER_MASS, SPECIFIC_HEAT
+    cfg = load_config()
+
+    # Restore physics parameters (fall back to defaults if never saved)
+    WATER_MASS    = cfg.get("water_mass",    0.3)
+    SPECIFIC_HEAT = cfg.get("specific_heat", 4186)
+    mass_entry.delete(0, "end")
+    mass_entry.insert(0, str(WATER_MASS))
+    heat_entry.delete(0, "end")
+    heat_entry.insert(0, str(SPECIFIC_HEAT))
+    params_status.configure(
+        text=f"  m = {WATER_MASS} kg   c = {SPECIFIC_HEAT} J/kg·K"
+    )
+
+    port_var.set(cfg.get("last_port", "Auto-detect"))
     connect()
 
 
