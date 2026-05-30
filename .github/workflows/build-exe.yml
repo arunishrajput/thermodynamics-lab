@@ -1,0 +1,52 @@
+name: Build Executables
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:        # also lets you trigger it manually from the Actions tab
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false      # if one platform fails, still finish the other
+      matrix:
+        include:
+          - os: windows-latest
+            platform: Windows
+            artifact_name: ThermodynamicsLab-Windows
+            artifact_path: dist/ThermodynamicsLab.exe
+
+          - os: macos-latest
+            platform: macOS
+            artifact_name: ThermodynamicsLab-macOS
+            artifact_path: dist/ThermodynamicsLab-macOS.zip
+
+    runs-on: ${{ matrix.os }}
+    name: Build · ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pyinstaller
+
+      - name: Build executable
+        run: pyinstaller --clean ThermodynamicsLab.spec
+
+      # macOS only — zip the .app bundle so permissions & symlinks are preserved
+      - name: Package .app bundle (macOS)
+        if: runner.os == 'macOS'
+        run: ditto -c -k --keepParent dist/ThermodynamicsLab.app dist/ThermodynamicsLab-macOS.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
+          retention-days: 30
