@@ -45,7 +45,24 @@ The **1st Law of Thermodynamics** states that energy is conserved:
 >
 > Electrical energy in = useful heat absorbed + environmental losses
 
-The dashboard shows this balance live and prints a verdict after each experiment.
+The dashboard shows this balance live and prints a colour-coded verdict after each experiment.
+
+---
+
+## Dashboard Features
+
+| Feature | Details |
+|---------|---------|
+| **Live sensor cards** | Temperature, Voltage, Current, Power, Energy, Heater status — updated every second |
+| **Real-time graph** | Temperature vs time with glow fill, auto-scales as data arrives |
+| **Experiment mode** | START captures T₀ and E₀ · STOP captures T₁ and E₁ · live timer shows elapsed time |
+| **Results panel** | T₀, T₁, ΔT, Q, W, η — scrollable so nothing is ever cropped |
+| **1st Law analysis** | Full breakdown of W, Q, Loss and η with a colour-coded verdict |
+| **Port selector** | Auto-detect Arduino or choose a specific COM/serial port from a dropdown |
+| **Connection status** | Live indicator in the header; detects unexpected disconnects automatically |
+| **Configurable parameters** | Set water mass and specific heat · liquid preset dropdown (Water, Ethanol, Motor Oil, Glycerin, Mercury, Custom) · values persist between sessions |
+| **CSV export** | Save the full temperature vs time log to a `.csv` file |
+| **Scrollable sidebar** | All panels (Connection, Live Sensors, Parameters) scroll independently so nothing is hidden at any window size |
 
 ---
 
@@ -56,11 +73,11 @@ The dashboard shows this balance live and prints a verdict after each experiment
 | Arduino (Uno / Nano / Mega) | Reads all sensors, sends CSV over USB serial at 9600 baud |
 | DS18B20 temperature sensor | Measures water temperature (°C) |
 | ACS712 current sensor | Measures current through the heater (A) |
-| Voltage sensor module | Measures 12V supply voltage (V) |
-| 40W ceramic cartridge heater | Heats the water (powered by 12V DC adapter) |
-| 12V DC adapter | Power source for the heater |
+| Voltage sensor module | Measures 12 V supply voltage (V) |
+| 40 W ceramic cartridge heater | Heats the water (powered by 12 V DC adapter) |
+| 12 V DC adapter | Power source for the heater |
 
-**Wiring diagram:** Arduino reads DS18B20 for temperature, uses the voltage divider module to sense the 12V rail, and uses the ACS712 to sense current through the heater circuit. The Arduino computes `P = V × I` and integrates it over time to get energy.
+**Wiring:** Arduino reads DS18B20 for temperature, uses the voltage divider module to sense the 12 V rail, and uses the ACS712 to sense current through the heater circuit. It computes `P = V × I` and integrates over time to get cumulative energy, then sends all six values over serial every ~1 s.
 
 ---
 
@@ -85,17 +102,6 @@ Example:
 | power | float | W |
 | energy | float | J (cumulative since Arduino boot) |
 | heater_status | int (0/1) | 1 = heater ON |
-
----
-
-## Dashboard Features
-
-- **Live sensor cards** — Temperature, Voltage, Current, Power, Energy, Heater status
-- **Real-time temperature graph** with glow fill
-- **Experiment mode** — START captures T₀ and E₀; STOP captures T₁ and E₁
-- **Results panel** — shows T₀, T₁, ΔT, Q, W, and η
-- **1st Law analysis** — prints W = Q + Loss with a colour-coded verdict
-- **Auto-detects** the Arduino COM/serial port on both Windows and macOS
 
 ---
 
