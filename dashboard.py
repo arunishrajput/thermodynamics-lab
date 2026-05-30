@@ -102,6 +102,7 @@ ctk.set_appearance_mode("dark")
 app = ctk.CTk()
 app.title("Thermodynamics Lab · 1st Law Verification")
 app.geometry("1420x900")
+app.minsize(1100, 720)
 app.configure(fg_color=BG)
 
 # ── Header ────────────────────────────────────────────────────────────────────
@@ -141,8 +142,13 @@ body.columnconfigure(0, weight=0, minsize=282)
 body.columnconfigure(1, weight=1)
 body.rowconfigure(0, weight=1)
 
-# ── LEFT panel ────────────────────────────────────────────────────────────────
-left = ctk.CTkFrame(body, fg_color=CARD, corner_radius=12)
+# ── LEFT panel — scrollable so all sections are reachable at any window size ──
+left = ctk.CTkScrollableFrame(
+    body, fg_color=CARD, corner_radius=12,
+    scrollbar_fg_color=CARD,
+    scrollbar_button_color=BORDER,
+    scrollbar_button_hover_color=CYAN,
+)
 left.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
 
 # ── Connection section ────────────────────────────────────────────────────────
@@ -355,6 +361,14 @@ fill_ref   = [None]
 mpl_canvas = FigureCanvasTkAgg(fig, master=gf)
 mpl_canvas.get_tk_widget().pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
+def _on_graph_resize(event):
+    if event.width > 50 and event.height > 50:
+        fig.set_size_inches(event.width / fig.dpi, event.height / fig.dpi)
+        fig.tight_layout(pad=2.5)
+        mpl_canvas.draw_idle()
+
+mpl_canvas.get_tk_widget().bind("<Configure>", _on_graph_resize)
+
 # ── Results ───────────────────────────────────────────────────────────────────
 rf = ctk.CTkFrame(right, fg_color=CARD, corner_radius=12)
 rf.grid(row=1, column=0, sticky="nsew", pady=(0, 10))
@@ -413,18 +427,35 @@ verdict_lbl = ctk.CTkLabel(
 )
 verdict_lbl.pack(fill="x", padx=16, pady=(0, 12))
 
+def _on_analysis_resize(event):
+    w = max(event.width - 36, 120)
+    analysis_lbl.configure(wraplength=w)
+    verdict_lbl.configure(wraplength=w)
+
+analysis_frame.bind("<Configure>", _on_analysis_resize)
+
 # ── Controls ──────────────────────────────────────────────────────────────────
 cf = ctk.CTkFrame(right, fg_color=CARD, corner_radius=12)
 cf.grid(row=2, column=0, sticky="ew")
 
-btn_row = ctk.CTkFrame(cf, fg_color="transparent")
-btn_row.pack(fill="x", padx=16, pady=13)
+btn_outer = ctk.CTkFrame(cf, fg_color="transparent")
+btn_outer.pack(fill="x", padx=16, pady=13)
+
+# Status row
+status_row = ctk.CTkFrame(btn_outer, fg_color="transparent")
+status_row.pack(fill="x", pady=(0, 6))
 
 exp_status = ctk.CTkLabel(
-    btn_row, text="●  IDLE",
+    status_row, text="●  IDLE",
     font=("SF Mono", 12), text_color=TEXT_DIM
 )
-exp_status.pack(side="right", padx=6)
+exp_status.pack(side="right")
+
+# Button row — grid so buttons scale with the window width
+btn_row = ctk.CTkFrame(btn_outer, fg_color="transparent")
+btn_row.pack(fill="x")
+for col in range(4):
+    btn_row.columnconfigure(col, weight=1)
 
 
 # ── Event handlers ────────────────────────────────────────────────────────────
@@ -611,39 +642,39 @@ def export_csv():
             writer.writerow([f"{t:.2f}", f"{temp:.2f}"])
 
 
-# ── Buttons ───────────────────────────────────────────────────────────────────
+# ── Buttons — fluid grid, each column equal weight ────────────────────────────
 start_btn = ctk.CTkButton(
-    btn_row, text="▶  START", width=120, height=36,
+    btn_row, text="▶  START", height=36,
     fg_color=CARD2, border_width=1, border_color=GREEN,
     text_color=GREEN, hover_color="#0a2e1a",
     font=("SF Mono", 12, "bold"), corner_radius=8,
     command=lambda: start_experiment()
 )
-start_btn.pack(side="left", padx=(0, 8))
+start_btn.grid(row=0, column=0, sticky="ew", padx=(0, 4))
 
 ctk.CTkButton(
-    btn_row, text="■  STOP", width=120, height=36,
+    btn_row, text="■  STOP", height=36,
     fg_color=CARD2, border_width=1, border_color=RED,
     text_color=RED, hover_color="#2e0a0a",
     font=("SF Mono", 12, "bold"), corner_radius=8,
     command=lambda: stop_experiment()
-).pack(side="left", padx=(0, 8))
+).grid(row=0, column=1, sticky="ew", padx=(0, 4))
 
 ctk.CTkButton(
-    btn_row, text="↺  RESET", width=120, height=36,
+    btn_row, text="↺  RESET", height=36,
     fg_color=CARD2, border_width=1, border_color=BORDER,
     text_color=TEXT_MID, hover_color=CARD2,
     font=("SF Mono", 12, "bold"), corner_radius=8,
     command=lambda: reset_experiment()
-).pack(side="left", padx=(0, 16))
+).grid(row=0, column=2, sticky="ew", padx=(0, 4))
 
 ctk.CTkButton(
-    btn_row, text="⬇  EXPORT CSV", width=148, height=36,
+    btn_row, text="⬇  CSV", height=36,
     fg_color=CARD2, border_width=1, border_color=PURPLE,
     text_color=PURPLE, hover_color="#1a1030",
     font=("SF Mono", 12, "bold"), corner_radius=8,
     command=lambda: export_csv()
-).pack(side="left")
+).grid(row=0, column=3, sticky="ew")
 
 # ── Serial reader thread ──────────────────────────────────────────────────────
 def read_serial():
