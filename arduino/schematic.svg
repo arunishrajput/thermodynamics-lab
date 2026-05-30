@@ -1,0 +1,271 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 575" font-family="'Courier New',Courier,monospace">
+
+  <!-- Background -->
+  <rect width="900" height="575" fill="#080d18" rx="8"/>
+
+  <!-- Title -->
+  <text x="450" y="21" text-anchor="middle" fill="#475569" font-size="11" font-weight="bold" letter-spacing="2">THERMODYNAMICS LAB  ·  WIRING SCHEMATIC</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       POWER CIRCUIT  (top band)
+       12V Adapter → ACS712 → Heater → GND
+       Voltage Divider taps the 12V rail
+  ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- 12V DC Adapter -->
+  <rect x="30" y="35" width="152" height="56" rx="5" fill="#0d1424" stroke="#f87171" stroke-width="1.5"/>
+  <text x="106" y="56" text-anchor="middle" fill="#f87171" font-size="10" font-weight="bold">12V DC ADAPTER</text>
+  <text x="106" y="71" text-anchor="middle" fill="#475569" font-size="9">≥ 3A  power supply</text>
+  <text x="106" y="83" text-anchor="middle" fill="#475569" font-size="8">+12V  ·  GND</text>
+
+  <!-- 12V rail:  adapter → ACS712 -->
+  <line x1="182" y1="60" x2="248" y2="60" stroke="#f87171" stroke-width="2"/>
+  <!-- Junction dot (12V branches to V.Div too) -->
+  <circle cx="200" cy="60" r="3.5" fill="#f87171"/>
+  <!-- Branch up-right to voltage divider (routes along y=28) -->
+  <line x1="200" y1="60" x2="200" y2="28" stroke="#f87171" stroke-width="1.5"/>
+  <line x1="200" y1="28" x2="762" y2="28" stroke="#f87171" stroke-width="1.5"/>
+  <line x1="762" y1="28" x2="762" y2="68" stroke="#f87171" stroke-width="1.5"/>
+
+  <!-- ACS712 -->
+  <rect x="248" y="35" width="152" height="56" rx="5" fill="#0d1424" stroke="#1c2a42" stroke-width="1.5"/>
+  <text x="324" y="56" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="bold">ACS712-5A</text>
+  <text x="324" y="71" text-anchor="middle" fill="#475569" font-size="9">Current Sensor</text>
+  <text x="324" y="83" text-anchor="middle" fill="#475569" font-size="8">IP+ → IP−  in heater loop</text>
+
+  <!-- 12V rail:  ACS712 → Heater -->
+  <line x1="400" y1="60" x2="460" y2="60" stroke="#f87171" stroke-width="2"/>
+
+  <!-- Heater -->
+  <rect x="460" y="35" width="152" height="56" rx="5" fill="#0d1424" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="536" y="56" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="bold">40W HEATER</text>
+  <text x="536" y="71" text-anchor="middle" fill="#475569" font-size="9">Ceramic Cartridge</text>
+  <text x="536" y="83" text-anchor="middle" fill="#475569" font-size="8">12V  ·  ~3.3A</text>
+
+  <!-- Heater → GND -->
+  <line x1="612" y1="60" x2="638" y2="60" stroke="#475569" stroke-width="2"/>
+  <line x1="638" y1="60" x2="638" y2="68" stroke="#475569" stroke-width="2"/>
+  <line x1="626" y1="68" x2="650" y2="68" stroke="#475569" stroke-width="2.5"/>
+  <line x1="629" y1="74" x2="647" y2="74" stroke="#475569" stroke-width="1.5"/>
+  <line x1="632" y1="80" x2="644" y2="80" stroke="#475569" stroke-width="1"/>
+  <text x="638" y="92" text-anchor="middle" fill="#475569" font-size="8">GND</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       VOLTAGE DIVIDER  (top right)
+  ════════════════════════════════════════════════════════════════════ -->
+
+  <rect x="700" y="33" width="168" height="172" rx="5" fill="#0d1424" stroke="#1c2a42" stroke-width="1.5"/>
+  <text x="784" y="51" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="bold">VOLTAGE DIVIDER</text>
+
+  <!-- +12V label inside box -->
+  <text x="720" y="65" fill="#f87171" font-size="9" font-weight="bold">+12V</text>
+
+  <!-- R1 -->
+  <rect x="748" y="68" width="72" height="40" rx="3" fill="#101828" stroke="#1c2a42" stroke-width="1"/>
+  <text x="784" y="84" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="bold">R1</text>
+  <text x="784" y="98" text-anchor="middle" fill="#475569" font-size="8">30 kΩ</text>
+
+  <!-- R1 bottom to junction -->
+  <line x1="784" y1="108" x2="784" y2="125" stroke="#94a3b8" stroke-width="1.5"/>
+
+  <!-- Junction node -->
+  <circle cx="784" cy="125" r="4" fill="#00d4ff"/>
+  <!-- Junction label + arrow to A2 -->
+  <line x1="784" y1="125" x2="700" y2="125" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="707" y="120" fill="#00d4ff" font-size="8">→ A2</text>
+
+  <!-- Junction to R2 -->
+  <line x1="784" y1="129" x2="784" y2="143" stroke="#94a3b8" stroke-width="1.5"/>
+
+  <!-- R2 -->
+  <rect x="748" y="143" width="72" height="40" rx="3" fill="#101828" stroke="#1c2a42" stroke-width="1"/>
+  <text x="784" y="159" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="bold">R2</text>
+  <text x="784" y="173" text-anchor="middle" fill="#475569" font-size="8">7.5 kΩ</text>
+
+  <!-- R2 → GND -->
+  <line x1="784" y1="183" x2="784" y2="193" stroke="#475569" stroke-width="1.5"/>
+  <line x1="772" y1="193" x2="796" y2="193" stroke="#475569" stroke-width="2.5"/>
+  <line x1="775" y1="199" x2="793" y2="199" stroke="#475569" stroke-width="1.5"/>
+  <line x1="778" y1="205" x2="790" y2="205" stroke="#475569" stroke-width="1"/>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       ARDUINO UNO  (center)
+  ════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Main body -->
+  <rect x="240" y="168" width="352" height="244" rx="8" fill="#0d1424" stroke="#00d4ff" stroke-width="2"/>
+  <!-- Title bar -->
+  <rect x="240" y="168" width="352" height="27" rx="8" fill="#091220"/>
+  <rect x="240" y="186" width="352" height="9" fill="#091220"/>
+  <text x="416" y="186" text-anchor="middle" fill="#00d4ff" font-size="12" font-weight="bold" letter-spacing="1">ARDUINO UNO</text>
+
+  <!-- USB note -->
+  <text x="416" y="208" text-anchor="middle" fill="#475569" font-size="9">USB serial · 9600 baud  →  Python Dashboard</text>
+  <line x1="260" y1="215" x2="572" y2="215" stroke="#1c2a42" stroke-width="1"/>
+
+  <!-- Left pin ticks and labels (inputs) -->
+  <!-- A1 — ACS712 VIOUT -->
+  <line x1="230" y1="232" x2="252" y2="232" stroke="#00d4ff" stroke-width="2.5"/>
+  <text x="257" y="236" fill="#00d4ff" font-size="9" font-weight="bold">A1</text>
+  <text x="285" y="236" fill="#94a3b8" font-size="9">← ACS712 VIOUT</text>
+
+  <!-- D2 — DS18B20 -->
+  <line x1="230" y1="256" x2="252" y2="256" stroke="#00d4ff" stroke-width="2.5"/>
+  <text x="257" y="260" fill="#00d4ff" font-size="9" font-weight="bold">D2</text>
+  <text x="285" y="260" fill="#94a3b8" font-size="9">← DS18B20 data  (4.7 kΩ ↑5V)</text>
+
+  <!-- A4/SDA — LCD -->
+  <line x1="230" y1="280" x2="252" y2="280" stroke="#a78bfa" stroke-width="2.5"/>
+  <text x="257" y="284" fill="#a78bfa" font-size="9" font-weight="bold">A4 SDA</text>
+  <text x="309" y="284" fill="#94a3b8" font-size="9">← LCD SDA</text>
+
+  <!-- A5/SCL — LCD -->
+  <line x1="230" y1="304" x2="252" y2="304" stroke="#a78bfa" stroke-width="2.5"/>
+  <text x="257" y="308" fill="#a78bfa" font-size="9" font-weight="bold">A5 SCL</text>
+  <text x="309" y="308" fill="#94a3b8" font-size="9">← LCD SCL</text>
+
+  <!-- 5V out -->
+  <line x1="230" y1="334" x2="252" y2="334" stroke="#34d399" stroke-width="2.5"/>
+  <text x="257" y="338" fill="#34d399" font-size="9" font-weight="bold">5V</text>
+  <text x="285" y="338" fill="#94a3b8" font-size="9">→ DS18B20 Vcc · ACS712 Vcc · LCD Vcc</text>
+
+  <!-- GND out -->
+  <line x1="230" y1="358" x2="252" y2="358" stroke="#475569" stroke-width="2.5"/>
+  <text x="257" y="362" fill="#475569" font-size="9" font-weight="bold">GND</text>
+  <text x="285" y="362" fill="#475569" font-size="9">→ all sensor GNDs  (common reference)</text>
+
+  <!-- Right pin — A2 voltage divider -->
+  <line x1="592" y1="232" x2="614" y2="232" stroke="#00d4ff" stroke-width="2.5"/>
+  <text x="618" y="236" fill="#00d4ff" font-size="9" font-weight="bold">A2</text>
+  <text x="642" y="236" fill="#94a3b8" font-size="9">← Divider junction</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       DS18B20  (left, aligned with D2 pin)
+  ════════════════════════════════════════════════════════════════════ -->
+
+  <rect x="30" y="221" width="168" height="72" rx="5" fill="#0d1424" stroke="#1c2a42" stroke-width="1.5"/>
+  <text x="114" y="240" text-anchor="middle" fill="#00d4ff" font-size="10" font-weight="bold">DS18B20</text>
+  <text x="114" y="255" text-anchor="middle" fill="#475569" font-size="9">Temperature Sensor</text>
+  <text x="114" y="269" text-anchor="middle" fill="#475569" font-size="8">Data → D2   Vcc → 5V</text>
+  <text x="114" y="282" text-anchor="middle" fill="#475569" font-size="8">4.7 kΩ pull-up: 5V → D2 pin</text>
+
+  <!-- DS18B20 data → Arduino D2 -->
+  <line x1="198" y1="256" x2="230" y2="256" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       LCD  (left, aligned below DS18B20)
+  ════════════════════════════════════════════════════════════════════ -->
+
+  <rect x="30" y="345" width="168" height="72" rx="5" fill="#0d1424" stroke="#1c2a42" stroke-width="1.5"/>
+  <text x="114" y="364" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="bold">16×2 LCD  (I2C)</text>
+  <text x="114" y="379" text-anchor="middle" fill="#475569" font-size="9">I2C addr 0x27</text>
+  <text x="114" y="393" text-anchor="middle" fill="#475569" font-size="8">SDA → A4   SCL → A5</text>
+  <text x="114" y="406" text-anchor="middle" fill="#475569" font-size="8">Vcc → 5V   GND → GND</text>
+
+  <!-- LCD SDA → Arduino A4/SDA  (L-shaped route) -->
+  <line x1="198" y1="370" x2="213" y2="370" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="213" y1="370" x2="213" y2="280" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="213" y1="280" x2="230" y2="280" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+  <!-- LCD SCL → Arduino A5/SCL  (L-shaped route) -->
+  <line x1="198" y1="382" x2="220" y2="382" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="220" y1="382" x2="220" y2="304" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="220" y1="304" x2="230" y2="304" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       SIGNAL ROUTE: ACS712 VIOUT → Arduino A1
+       From ACS712 bottom-center (324, 91) down and left to A1 (230, 232)
+  ════════════════════════════════════════════════════════════════════ -->
+
+  <line x1="324" y1="91" x2="324" y2="152" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="324" y1="152" x2="226" y2="152" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="226" y1="152" x2="226" y2="232" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="226" y1="232" x2="230" y2="232" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="335" y="147" fill="#00d4ff" font-size="8">VIOUT</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       SIGNAL ROUTE: Voltage divider junction → Arduino A2
+       Junction (700, 125) → left → down → Arduino A2 (614, 232)
+  ════════════════════════════════════════════════════════════════════ -->
+
+  <line x1="700" y1="125" x2="635" y2="125" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="635" y1="125" x2="635" y2="232" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="635" y1="232" x2="614" y2="232" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       LEGEND
+  ════════════════════════════════════════════════════════════════════ -->
+
+  <rect x="618" y="260" width="262" height="186" rx="5" fill="#0d1424" stroke="#1c2a42" stroke-width="1"/>
+  <text x="749" y="278" text-anchor="middle" fill="#475569" font-size="9" font-weight="bold" letter-spacing="2">LEGEND</text>
+  <line x1="628" y1="283" x2="870" y2="283" stroke="#1c2a42" stroke-width="1"/>
+
+  <line x1="634" y1="297" x2="672" y2="297" stroke="#f87171" stroke-width="2"/>
+  <text x="680" y="301" fill="#94a3b8" font-size="9">12V power rail</text>
+
+  <line x1="634" y1="315" x2="672" y2="315" stroke="#f87171" stroke-width="2"/>
+  <circle cx="653" cy="315" r="3.5" fill="#f87171"/>
+  <text x="680" y="319" fill="#94a3b8" font-size="9">Junction / branch point</text>
+
+  <line x1="634" y1="333" x2="672" y2="333" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="680" y="337" fill="#94a3b8" font-size="9">Analog / digital signal</text>
+
+  <line x1="634" y1="351" x2="672" y2="351" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="680" y="355" fill="#94a3b8" font-size="9">I2C bus  (SDA / SCL)</text>
+
+  <line x1="634" y1="369" x2="672" y2="369" stroke="#34d399" stroke-width="1.5"/>
+  <text x="680" y="373" fill="#94a3b8" font-size="9">5V supply (Arduino → sensors)</text>
+
+  <line x1="634" y1="387" x2="672" y2="387" stroke="#475569" stroke-width="2"/>
+  <text x="680" y="391" fill="#94a3b8" font-size="9">GND  (common reference)</text>
+
+  <circle cx="653" cy="405" r="4" fill="#00d4ff"/>
+  <text x="680" y="409" fill="#94a3b8" font-size="9">Divider junction tap → A2</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       PIN SUMMARY TABLE  (inside Arduino frame, bottom)
+  ════════════════════════════════════════════════════════════════════ -->
+
+  <rect x="250" y="378" width="330" height="128" rx="4" fill="#091220" stroke="#1c2a42" stroke-width="1"/>
+  <text x="415" y="394" text-anchor="middle" fill="#475569" font-size="8" font-weight="bold" letter-spacing="2">PIN SUMMARY</text>
+  <line x1="258" y1="399" x2="572" y2="399" stroke="#1c2a42" stroke-width="1"/>
+
+  <!-- Headers -->
+  <text x="262" y="411" fill="#475569" font-size="7.5" font-weight="bold">PIN</text>
+  <text x="300" y="411" fill="#475569" font-size="7.5" font-weight="bold">CONNECTS TO</text>
+  <text x="480" y="411" fill="#475569" font-size="7.5" font-weight="bold">DETAIL</text>
+  <line x1="258" y1="415" x2="572" y2="415" stroke="#1c2a42" stroke-width="1"/>
+
+  <text x="262" y="427" fill="#00d4ff" font-size="8">D2</text>
+  <text x="300" y="427" fill="#94a3b8" font-size="8">DS18B20 data</text>
+  <text x="480" y="427" fill="#475569" font-size="8">4.7 kΩ pull-up to 5V</text>
+
+  <text x="262" y="441" fill="#00d4ff" font-size="8">A1</text>
+  <text x="300" y="441" fill="#94a3b8" font-size="8">ACS712 VIOUT</text>
+  <text x="480" y="441" fill="#475569" font-size="8">0 – 5V analog</text>
+
+  <text x="262" y="455" fill="#00d4ff" font-size="8">A2</text>
+  <text x="300" y="455" fill="#94a3b8" font-size="8">Voltage divider junction</text>
+  <text x="480" y="455" fill="#475569" font-size="8">R1=30kΩ  R2=7.5kΩ</text>
+
+  <text x="262" y="469" fill="#a78bfa" font-size="8">A4 / SDA</text>
+  <text x="300" y="469" fill="#94a3b8" font-size="8">LCD SDA</text>
+  <text x="480" y="469" fill="#475569" font-size="8">I2C data line</text>
+
+  <text x="262" y="483" fill="#a78bfa" font-size="8">A5 / SCL</text>
+  <text x="300" y="483" fill="#94a3b8" font-size="8">LCD SCL</text>
+  <text x="480" y="483" fill="#475569" font-size="8">I2C clock line</text>
+
+  <text x="262" y="497" fill="#34d399" font-size="8">5V / GND</text>
+  <text x="300" y="497" fill="#94a3b8" font-size="8">All sensor Vcc / GND</text>
+  <text x="480" y="497" fill="#475569" font-size="8">Common reference</text>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       BOTTOM NOTE
+  ════════════════════════════════════════════════════════════════════ -->
+
+  <text x="450" y="558" text-anchor="middle" fill="#1c2a42" font-size="8">
+    All GNDs are common · Arduino powered via USB · 12V circuit is galvanically separate · ACS712 in series with heater hot wire
+  </text>
+
+</svg>

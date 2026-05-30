@@ -49,20 +49,19 @@ The Arduino reads three sensors every ~6 seconds, computes power and cumulative 
 | 40 W ceramic cartridge heater | Heats the water, powered by 12 V DC |
 | 12 V DC adapter | Power source for the heater |
 
-### Wiring
+### Schematic
 
-```
-Arduino D2  ──── DS18B20 data  (4.7 kΩ pull-up to 5 V)
-Arduino A1  ──── ACS712 VIOUT
-Arduino A2  ──── Voltage divider output  (R1 = 30 kΩ, R2 = 7.5 kΩ)
-Arduino SDA ──── LCD SDA
-Arduino SCL ──── LCD SCL
-```
+![Wiring schematic](arduino/schematic.svg)
 
-- DS18B20 Vcc → 5 V, GND → GND, with a 4.7 kΩ resistor between Vcc and the data line.
-- ACS712 Vcc → 5 V, GND → GND. The heater current flows through its IP+ / IP− terminals.
-- Voltage divider: 12 V rail → R1 (30 kΩ) → junction → R2 (7.5 kΩ) → GND. Junction to A2. This scales 0–25 V down to 0–5 V for the Arduino ADC (×5 factor used in firmware).
-- LCD module Vcc → 5 V, GND → GND, SDA → A4, SCL → A5 (on Uno).
+### Wiring notes
+
+| Connection | Detail |
+|-----------|--------|
+| DS18B20 data → D2 | 4.7 kΩ pull-up resistor between the data line and 5 V |
+| ACS712 IP+ / IP− | In series with the heater hot wire (measures current through the heater) |
+| Voltage divider → A2 | R1 = 30 kΩ (top), R2 = 7.5 kΩ (bottom). Junction scales 0–25 V → 0–5 V (×5 factor in firmware) |
+| LCD SDA → A4, SCL → A5 | Standard I2C on Uno. Change pins for Mega/Nano if needed |
+| All GNDs | Common reference — connect Arduino GND, 12 V supply GND, and sensor GNDs together |
 
 ---
 
